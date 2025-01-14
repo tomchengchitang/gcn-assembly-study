@@ -4,19 +4,19 @@
 .p2align 8
 .type relu,@function
 relu:
-  s_load_dwordx2 s[4:5], s[0:1] 0    //s[4:7] for Srd a
-  s_load_dwordx2 s[8:9], s[0:1] 8    //s[8:11] for Srd b
-  s_load_dword s[0], s[0:1] 16       //reuse s[0] for # of elements
-  s_mul_i32 s[6], s[0], 0x4
-  s_mul_i32 s[10], s[0], 0x4
-  s_mov_b32 s[7], 0x20000
-  s_mov_b32 s[11], 0x20000
-  v_lshl_add_u32 v0, s2, 8, v0       //s2 holds workgroup ID, g_tId = (workgroupId * workgroupSize) + tId
-  v_cmpx_lt_u32 vcc, v0, s0          //set exec mask
-  v_lshlrev_b32 v2, 2, v0            //byte offset: g_tId * sizeof(float)
-  s_waitcnt lgkmcnt(0)               //wait for Srds
-  buffer_load_dword v0, v2, s[4:7], 0 offen offset:0
-  s_waitcnt vmcnt(0)                 //wait for buffer load
+  s_load_dwordx2 s[4:5], s[0:1] 0         // s[4:7] for Srd a
+  s_load_dwordx2 s[8:9], s[0:1] 8         // s[8:11] for Srd b
+  s_load_dword s[0], s[0:1] 16            // reuse s[0] for # of elements
+  s_mul_i32 s[6], s[0], 0x4               // calculate the Num_records in bytes
+  s_mul_i32 s[10], s[0], 0x4              // calculate the Num_records in bytes
+  s_mov_b32 s[7], 0x20000                 // Specify the format for Srd a, refer to Buffer Resource Descriptor table
+  s_mov_b32 s[10], 0x20000                // Specify the format for Srd b
+  v_lshl_add_u32 v0, s2, 8, v0            // gId = (wordGroud * 256 + tId): calculate the global thread idx where s2 holds the wordGroud ID
+  v_cmpx_lt_u32 vcc, v0, s0               // set the exec mask so we can mask out lanes whose gId > numElements = s0
+  v_lshlrev_b32 v2, 2, v0                 // byte offset for each thread to insert data
+  s_waitcnt lgkmcnt(0)                    // wait Srds
+  buffer_load_dword v0, v2, s[4:7], 0     // offen offset: 0
+  s_waitcnt vmcnt(0)                      //wait for buffer load
   v_max_f32 v0, v0, 0
   buffer_store_dword v0, v2, s[8:11], 0 offen offset:0
   s_endpgm
