@@ -33,4 +33,5 @@ make -j
 - Demonstrate how to use reduction method to get the maximum value via multiple threads in GPU
 - Please refer to my diagram to understand the assembly algorithm if you are new to assembly.
 
-![IMG_1912](https://hackmd.io/_uploads/Skh_Si7w1g.png)
+
+![IMG_1912](https://github.com/user-attachments/assets/5a09cbec-7177-4b81-aa82-97d75f51c4b5)
